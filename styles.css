@@ -1,0 +1,188 @@
+/* Shared tokens - only apply under extension roots to avoid clashing with host page. */
+#cursor-spending-pace,
+.cursor-usage-event-card {
+  --cde-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --cde-fg: #f8fafc;
+  --cde-muted: rgb(248 250 252 / 0.65);
+  --cde-muted-68: rgb(248 250 252 / 0.68);
+  --cde-muted-70: rgb(248 250 252 / 0.7);
+  --cde-muted-82: rgb(248 250 252 / 0.82);
+  --cde-inset-highlight: inset 0 1px 0 rgb(255 255 255 / 0.12);
+  box-sizing: border-box;
+  color: var(--cde-fg);
+  font-family: var(--cde-font);
+}
+
+#cursor-spending-pace {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+  z-index: 2147483647;
+  width: min(160px, calc(100vw - 32px));
+  padding: 14px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgb(23 23 23 / 0.94), rgb(8 8 8 / 0.9)),
+    radial-gradient(circle at top left, rgb(255 255 255 / 0.18), transparent 42%);
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 0.28),
+    var(--cde-inset-highlight);
+  overflow: hidden;
+  backdrop-filter: blur(18px);
+}
+
+#cursor-spending-pace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 3px solid #22c55e;
+  pointer-events: none;
+}
+
+#cursor-spending-pace[data-tone="careful"]::before {
+  border-top-color: #f59e0b;
+}
+
+#cursor-spending-pace[data-tone="tight"]::before {
+  border-top-color: #ef4444;
+}
+
+.cursor-spending-pace__eyebrow {
+  margin-bottom: 8px;
+  color: var(--cde-muted-68);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cursor-spending-pace__rows {
+  display: grid;
+  gap: 8px;
+}
+
+.cursor-spending-pace__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cursor-spending-pace__row span {
+  color: var(--cde-muted-70);
+  font-size: 13px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+
+.cursor-spending-pace__row strong {
+  color: var(--cde-fg);
+  font-size: 26px;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.cursor-usage-event-row--inspected {
+  outline: 1px solid rgb(96 165 250 / 0.5);
+  outline-offset: -1px;
+}
+
+.cursor-usage-event-card {
+  margin: 8px 0 14px;
+  padding: 14px;
+  border: 1px solid rgb(96 165 250 / 0.28);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgb(23 23 23 / 0.96), rgb(8 8 8 / 0.92)),
+    radial-gradient(circle at top left, rgb(96 165 250 / 0.2), transparent 42%);
+  box-shadow:
+    0 18px 44px rgb(0 0 0 / 0.24),
+    var(--cde-inset-highlight);
+}
+
+.cursor-usage-event-card__fields {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 12px;
+  row-gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+  justify-content: start;
+  align-items: baseline;
+}
+
+.cursor-usage-event-card__field {
+  display: contents;
+}
+
+.cursor-usage-event-card__field dt {
+  margin: 0;
+  color: var(--cde-muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-align: end;
+}
+
+.cursor-usage-event-card__field dd {
+  margin: 0;
+  color: var(--cde-fg);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.cursor-usage-event-card__status {
+  color: var(--cde-muted-82);
+  font-size: 13px;
+  font-weight: 520;
+  line-height: 1.35;
+}
+
+.cursor-usage-event-card__json-scroll {
+  box-sizing: border-box;
+  max-height: 140px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 8px 10px 10px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.38);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    inset 0 -18px 14px -14px rgb(0 0 0 / 0.65);
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.28) rgb(255 255 255 / 0.06);
+}
+
+.cursor-usage-event-card__json-scroll::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.cursor-usage-event-card__json-scroll::-webkit-scrollbar-track {
+  margin: 4px 0;
+  background: rgb(255 255 255 / 0.05);
+  border-radius: 5px;
+}
+
+.cursor-usage-event-card__json-scroll::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.28);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.cursor-usage-event-card__json-scroll pre {
+  margin: 0;
+  color: var(--cde-fg);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}

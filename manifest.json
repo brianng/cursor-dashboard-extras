@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Cursor Dashboard Extras",
+  "version": "0.1.0",
+  "description": "Enriches the Cursor dashboard with detailed usage information.",
+  "content_scripts": [
+    {
+      "matches": ["https://cursor.com/dashboard/usage*", "https://cursor.com/dashboard/spending*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
