@@ -1,5 +1,5 @@
 /* Shared tokens - only apply under extension roots to avoid clashing with host page. */
-#cursor-spending-pace,
+#cursor-usage-pace,
 .cursor-usage-event-card {
   --cde-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --cde-fg: #f8fafc;
@@ -13,12 +13,13 @@
   font-family: var(--cde-font);
 }
 
-#cursor-spending-pace {
+#cursor-usage-pace {
   position: fixed;
   right: 24px;
   top: 24px;
   z-index: 2147483647;
-  width: min(160px, calc(100vw - 32px));
+  width: fit-content;
+  max-width: min(240px, calc(100vw - 32px));
   padding: 14px;
   border: 1px solid rgb(255 255 255 / 0.14);
   border-radius: 16px;
@@ -32,24 +33,10 @@
   backdrop-filter: blur(18px);
 }
 
-#cursor-spending-pace::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-top: 3px solid #22c55e;
-  pointer-events: none;
-}
-
-#cursor-spending-pace[data-tone="careful"]::before {
-  border-top-color: #f59e0b;
-}
-
-#cursor-spending-pace[data-tone="tight"]::before {
-  border-top-color: #ef4444;
-}
-
-.cursor-spending-pace__eyebrow {
-  margin-bottom: 8px;
+.cursor-usage-pace__eyebrow {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
   color: var(--cde-muted-68);
   font-size: 11px;
   font-weight: 700;
@@ -58,31 +45,47 @@
   text-transform: uppercase;
 }
 
-.cursor-spending-pace__rows {
+.cursor-usage-pace__grid {
   display: grid;
-  gap: 8px;
-}
-
-.cursor-spending-pace__row {
-  display: flex;
+  grid-template-columns: max-content max-content max-content;
+  column-gap: 8px;
+  row-gap: 8px;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
 }
 
-.cursor-spending-pace__row span {
+.cursor-usage-pace__colhead {
+  color: var(--cde-muted-68);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.cursor-usage-pace__rowlabel {
   color: var(--cde-muted-70);
   font-size: 13px;
   font-weight: 620;
   letter-spacing: -0.01em;
 }
 
-.cursor-spending-pace__row strong {
+.cursor-usage-pace__value {
+  text-align: center;
   color: var(--cde-fg);
   font-size: 26px;
   font-weight: 760;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   line-height: 1;
+}
+
+.cursor-usage-pace__unit {
+  margin-left: 0.2em;
+  color: var(--cde-muted-70);
+  font-size: 13px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
 }
 
 .cursor-usage-event-row--inspected {

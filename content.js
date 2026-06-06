@@ -2,7 +2,7 @@
   // ---------------------------------------------------------------------------
   // Config
 
-  const WIDGET_ID = "cursor-spending-pace";
+  const WIDGET_ID = "cursor-usage-pace";
   const USAGE_EVENT_CARD_CLASS = "cursor-usage-event-card";
   const USAGE_EVENT_INSPECTED_ROW_CLASS = "cursor-usage-event-row--inspected";
   const USAGE_SUMMARY_URL = "/api/usage-summary";
@@ -76,7 +76,14 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Spending pace: API
+  // Usage pace: API
+
+  function createEmptyUsagePaceInfo() {
+    return {
+      auto: { current: null, budget: null },
+      api: { current: null, budget: null },
+    };
+  }
 
   function getElapsedDays(billingCycleStart) {
     const startTime = new Date(billingCycleStart).getTime();
@@ -98,39 +105,45 @@
     return Math.max(0, Math.ceil((endTime - Date.now()) / DAY_MS));
   }
 
-  function parseUsageSummary(summary) {
-    if (summary == null || typeof summary !== "object") {
+  function computeCurrentPace(percentUsed, elapsedDays) {
+    if (!Number.isFinite(percentUsed) || !Number.isFinite(elapsedDays)) {
       return null;
+    }
+
+    return percentUsed / elapsedDays;
+  }
+
+  function computeBudgetPace(percentUsed, daysRemaining) {
+    if (!Number.isFinite(percentUsed) || !Number.isFinite(daysRemaining) || daysRemaining <= 0) {
+      return null;
+    }
+
+    return Math.max(0, 100 - percentUsed) / daysRemaining;
+  }
+
+  function parseUsageSummary(summary) {
+    const info = createEmptyUsagePaceInfo();
+
+    if (summary == null || typeof summary !== "object") {
+      return info;
     }
 
     if (!summary.individualUsage || !summary.individualUsage.plan) {
-      return null;
+      return info;
     }
 
     const plan = summary.individualUsage.plan;
-
     const elapsedDays = getElapsedDays(summary.billingCycleStart);
     const daysRemaining = getDaysRemaining(summary.billingCycleEnd);
+    const autoUsedPercent = Number(plan.autoPercentUsed);
     const apiUsedPercent = Number(plan.apiPercentUsed);
 
-    if (
-      !Number.isFinite(elapsedDays) ||
-      !Number.isFinite(daysRemaining) ||
-      daysRemaining <= 0 ||
-      !Number.isFinite(apiUsedPercent)
-    ) {
-      return null;
-    }
+    info.auto.current = computeCurrentPace(autoUsedPercent, elapsedDays);
+    info.auto.budget = computeBudgetPace(autoUsedPercent, daysRemaining);
+    info.api.current = computeCurrentPace(apiUsedPercent, elapsedDays);
+    info.api.budget = computeBudgetPace(apiUsedPercent, daysRemaining);
 
-    const remainingPercent = Math.max(0, 100 - apiUsedPercent);
-
-    return {
-      daysRemaining,
-      apiUsedPercent,
-      remainingPercent,
-      currentPacePercent: apiUsedPercent / elapsedDays,
-      onBudgetPacePercent: remainingPercent / daysRemaining,
-    };
+    return info;
   }
 
   async function fetchUsageSummaryInfo() {
@@ -156,6 +169,13 @@
 
           return endpointInfo;
         })
+        .catch(() => {
+          if (endpointInfo && Date.now() - endpointInfoFetchedAt < ENDPOINT_CACHE_MS) {
+            return endpointInfo;
+          }
+
+          return createEmptyUsagePaceInfo();
+        })
         .finally(() => {
           endpointRequest = null;
         });
@@ -165,7 +185,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Spending pace: widget UI + update loop
+  // Usage pace: widget UI + update loop
 
   function formatPercent(value, options) {
     return new Intl.NumberFormat(undefined, {
@@ -174,8 +194,16 @@
     }).format(value);
   }
 
-  function getPaceTone(info) {
-    return info.currentPacePercent <= info.onBudgetPacePercent ? "comfortable" : "tight";
+  function formatPaceCellHtml(value) {
+    const unit = '<span class="cursor-usage-pace__unit">%</span>';
+
+    if (value === null || !Number.isFinite(value)) {
+      return `?.?${unit}`;
+    }
+
+    const figure = formatPercent(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    return `${figure}${unit}`;
   }
 
   function renderWidget(info) {
@@ -188,21 +216,18 @@
       document.body.appendChild(widget);
     }
 
-    const tone = getPaceTone(info);
-    const currentPace = `${formatPercent(info.currentPacePercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
-
-    widget.dataset.tone = tone;
     widget.innerHTML = `
-      <div class="cursor-spending-pace__eyebrow">API usage pace</div>
-      <div class="cursor-spending-pace__rows">
-        <div class="cursor-spending-pace__row">
-          <span>Current</span>
-          <strong>${currentPace}</strong>
-        </div>
-        <div class="cursor-spending-pace__row">
-          <span>Budget</span>
-          <strong>${formatPercent(info.onBudgetPacePercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</strong>
-        </div>
+      <div class="cursor-usage-pace__eyebrow">Daily Usage Pace</div>
+      <div class="cursor-usage-pace__grid">
+        <div class="cursor-usage-pace__colhead" aria-hidden="true"></div>
+        <div class="cursor-usage-pace__colhead">Auto+</div>
+        <div class="cursor-usage-pace__colhead">API</div>
+        <div class="cursor-usage-pace__rowlabel">Current</div>
+        <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.auto.current)}</strong>
+        <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.api.current)}</strong>
+        <div class="cursor-usage-pace__rowlabel">Budget</div>
+        <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.auto.budget)}</strong>
+        <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.api.budget)}</strong>
       </div>
     `;
   }
@@ -223,7 +248,7 @@
       return;
     }
 
-    let info = null;
+    let info = createEmptyUsagePaceInfo();
 
     try {
       info = await fetchUsageSummaryInfo();
@@ -235,11 +260,7 @@
       return;
     }
 
-    if (info) {
-      renderWidget(info);
-    } else {
-      removeWidget();
-    }
+    renderWidget(info);
   }
 
   function scheduleUpdate() {
@@ -259,7 +280,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Spending pace: route + observer (SPA)
+  // Usage pace: route + observer (SPA)
 
   function isSpendingDashboardPath() {
     return document.location.pathname.startsWith("/dashboard/spending");
