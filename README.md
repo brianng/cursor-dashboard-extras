@@ -5,7 +5,7 @@ Chrome extension (Manifest V3) that augments [Cursor](https://cursor.com) dashbo
 ## Features
 
 - **Usage** (`/dashboard/usage`): click a usage row to open a side panel with a token/cost summary and raw JSON from Cursor’s dashboard API.
-- **Spending** (`/dashboard/spending`): shows a **Daily Usage Pace** overlay with Auto+ and API columns (current pace vs budget pace per pool) from `/api/usage-summary`.
+- **Spending** (`/dashboard/spending`): shows a **Daily Usage Pace** overlay with 1P and API columns (current pace vs budget pace per pool) from `/api/usage-summary`.
 
 All requests stay **same-origin** on `cursor.com`; the extension does not send data elsewhere.
 
