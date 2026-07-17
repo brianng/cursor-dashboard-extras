@@ -27,26 +27,37 @@
   const USAGE_ROW_INTERACTIVE_GUARD_BRANCHES = [];
 
   /**
-   * Leading prefix of `span[title]` before any trailing zone token (e.g. `PDT`).
-   * Matched wall time is interpreted in the browser local zone (`Date` calendar ctor),
-   * not via `Date.parse` on the full string.
+   * `span[title]` on usage rows, e.g. `Jul 16, 2026, 11:46:55 PM UTC` (current) or
+   * `July 16, 2026, 3:45:30 PM PDT` (legacy local). Long month names are listed before
+   * abbreviations so `June` does not partially match `Jun`.
    */
-  const DASHBOARD_TITLE_LOCAL_DATETIME_RE =
-    /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s*(\d{4}),\s*(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)/i;
+  const DASHBOARD_TITLE_DATETIME_RE =
+    /^(January|February|March|April|June|July|August|September|October|November|December|May|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2}),\s*(\d{4}),\s*(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)(?:\s+(\S+))?/i;
 
   const DASHBOARD_TITLE_MONTH_INDEX = {
     january: 0,
+    jan: 0,
     february: 1,
+    feb: 1,
     march: 2,
+    mar: 2,
     april: 3,
+    apr: 3,
     may: 4,
     june: 5,
+    jun: 5,
     july: 6,
+    jul: 6,
     august: 7,
+    aug: 7,
     september: 8,
+    sep: 8,
     october: 9,
+    oct: 9,
     november: 10,
+    nov: 10,
     december: 11,
+    dec: 11,
   };
 
   // ---------------------------------------------------------------------------
@@ -507,8 +518,8 @@
     return row;
   }
 
-  function parseDashboardTitleLocalWallTimeToMs(trimmed) {
-    const m = DASHBOARD_TITLE_LOCAL_DATETIME_RE.exec(trimmed);
+  function parseDashboardTitleWallTimeToMs(trimmed) {
+    const m = DASHBOARD_TITLE_DATETIME_RE.exec(trimmed);
 
     if (!m) {
       return null;
@@ -526,6 +537,7 @@
     const minute = Number(m[5]);
     const second = Number(m[6]);
     const meridiem = m[7].toUpperCase();
+    const useUtc = m[8]?.toUpperCase() === "UTC";
 
     if (
       !Number.isFinite(day) ||
@@ -541,6 +553,26 @@
       hour += 12;
     } else if (meridiem === "AM" && hour === 12) {
       hour = 0;
+    }
+
+    if (useUtc) {
+      const t = Date.UTC(year, monthIndex, day, hour, minute, second);
+
+      if (!Number.isFinite(t)) {
+        return null;
+      }
+
+      const d = new Date(t);
+
+      if (
+        d.getUTCFullYear() !== year ||
+        d.getUTCMonth() !== monthIndex ||
+        d.getUTCDate() !== day
+      ) {
+        return null;
+      }
+
+      return t;
     }
 
     const d = new Date(year, monthIndex, day, hour, minute, second);
@@ -569,7 +601,7 @@
       return null;
     }
 
-    return parseDashboardTitleLocalWallTimeToMs(trimmed);
+    return parseDashboardTitleWallTimeToMs(trimmed);
   }
 
   function getFirstDataCellTitleTrimmed(row) {
