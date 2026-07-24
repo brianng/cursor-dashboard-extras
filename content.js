@@ -231,8 +231,8 @@
       <div class="cursor-usage-pace__eyebrow">Daily Usage Pace</div>
       <div class="cursor-usage-pace__grid">
         <div class="cursor-usage-pace__colhead" aria-hidden="true"></div>
-        <div class="cursor-usage-pace__colhead">1P</div>
-        <div class="cursor-usage-pace__colhead">API</div>
+        <div class="cursor-usage-pace__colhead">Cursor</div>
+        <div class="cursor-usage-pace__colhead">Other</div>
         <div class="cursor-usage-pace__rowlabel">Current</div>
         <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.auto.current)}</strong>
         <strong class="cursor-usage-pace__value">${formatPaceCellHtml(info.api.current)}</strong>
